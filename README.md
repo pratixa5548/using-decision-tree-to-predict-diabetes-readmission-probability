@@ -1,17 +1,19 @@
-# Diabetes Hospital Readmission Prediction Using Machine Learning
+# Diabetes Hospital Readmission Prediction
 
 ## Overview
 
-This project develops and evaluates machine learning models for predicting **early hospital readmission within 30 days of discharge among diabetic patients**.
+This project applies machine learning to predict **early hospital readmission within 30 days of discharge** among patients with diabetes.
 
-The project uses a clinical dataset containing information about patient demographics, hospital admissions, diagnoses, laboratory procedures, medications, and healthcare utilization. An end-to-end machine learning workflow was developed covering **data cleaning, exploratory data analysis, feature engineering, categorical encoding, class-imbalance handling, model training, hyperparameter tuning, and model evaluation**.
+The project uses the **Diabetes 130-US hospitals for years 1999–2008** dataset and develops an end-to-end machine learning pipeline involving data cleaning, exploratory data analysis, diagnostic feature engineering, categorical encoding, interaction features, class-imbalance handling, model training, hyperparameter tuning, and model evaluation.
+
+The final modelling dataset contains **67,580 patient encounters** and **71 model features**.
 
 Two classification approaches were evaluated:
 
 * **Decision Tree Classifier**
-* **K-Nearest Neighbors (KNN) Classifier**
+* **K-Nearest Neighbors (KNN)** with hyperparameter tuning
 
-The project also examines Decision Tree feature importance to identify the variables that contributed most strongly to the model's predictions.
+The project also uses Decision Tree feature importance to examine which variables contributed most strongly to model predictions.
 
 ---
 
@@ -19,46 +21,82 @@ The project also examines Decision Tree feature importance to identify the varia
 
 The main objectives of the project are to:
 
-* Analyze patterns associated with early hospital readmission among diabetic patients.
-* Explore relationships between demographic, clinical, medication, and hospital-utilization variables and readmission.
-* Clean and transform the clinical dataset into a machine-learning-ready format.
-* Engineer meaningful diagnostic and interaction features.
-* Convert the original three-class readmission outcome into a binary classification problem.
-* Address the substantial class imbalance using **SMOTE (Synthetic Minority Over-sampling Technique)**.
-* Develop and compare Decision Tree and KNN classification models.
-* Tune the KNN model using cross-validation.
-* Evaluate model performance using accuracy, precision, recall, F1 score, and ROC-AUC.
-* Analyze Decision Tree feature importance for model interpretability.
+* Explore factors associated with early hospital readmission among diabetic patients.
+* Perform exploratory analysis of demographic, clinical, medication, and hospital-utilization variables.
+* Clean and preprocess healthcare data for machine learning.
+* Engineer diagnostic and interaction features.
+* Convert categorical variables into numerical representations.
+* Address class imbalance using **SMOTE (Synthetic Minority Over-sampling Technique)**.
+* Develop an interpretable Decision Tree classifier.
+* Develop and tune a KNN classifier.
+* Compare model performance using classification metrics and ROC-AUC.
+* Analyze Decision Tree feature importance.
 
 ---
 
 ## Dataset
 
-The project is based on a diabetes clinical dataset containing **101,766 patient encounters and 50 original attributes**.
+The project is based on the **Diabetes 130-US hospitals for years 1999–2008** dataset.
 
-The original dataset contains information relating to:
+The original dataset contains:
 
-### Demographic Information
+* **101,766 patient encounters**
+* **50 original attributes**
+* Data collected from **130 US hospitals**
+* Patient demographic, admission, diagnostic, medication, laboratory, and hospital-utilization information.
+
+The original dataset contains three readmission outcomes:
+
+| Original Value | Meaning                                  |
+| -------------- | ---------------------------------------- |
+| `NO`           | No readmission within the defined period |
+| `>30`          | Readmission after 30 days                |
+| `<30`          | Readmission within 30 days               |
+
+For this project, the target was converted into a binary classification problem:
+
+* `1` → **Readmitted within 30 days**
+* `0` → **Not readmitted within 30 days**
+
+The final processed dataset used for modelling contains:
+
+**67,580 patient records and 71 model features.**
+
+---
+
+## Features
+
+The dataset contains information from several categories.
+
+### Demographic Features
 
 * Age
 * Gender
 * Race
 
-### Hospital Admission Information
+### Admission and Hospital Information
 
 * Admission type
 * Admission source
 * Discharge disposition
 * Time spent in hospital
-
-### Clinical Information
-
-* Primary, secondary, and tertiary diagnoses
-* Number of diagnoses
-* Number of laboratory procedures
 * Number of procedures
-* Glucose serum test results
-* HbA1c test results
+* Number of laboratory procedures
+* Number of medications
+
+### Healthcare Utilization
+
+* Number of emergency visits
+* Number of inpatient visits
+* Number of outpatient visits
+
+### Diagnostic Information
+
+* Primary diagnosis
+* Secondary diagnoses
+* Tertiary diagnoses
+* Hierarchical diagnostic categories
+* Number of diagnoses
 
 ### Medication Information
 
@@ -67,7 +105,6 @@ The dataset contains information about several diabetes medications, including:
 * Metformin
 * Repaglinide
 * Nateglinide
-* Chlorpropamide
 * Glimepiride
 * Glipizide
 * Glyburide
@@ -78,372 +115,164 @@ The dataset contains information about several diabetes medications, including:
 * Insulin
 * Combination medications
 
-### Healthcare Utilization
+### Diabetes-Specific Measurements
 
-The dataset includes:
-
-* Outpatient visits
-* Emergency visits
-* Inpatient visits
-
-### Target Variable
-
-The original `readmitted` variable contains three categories:
-
-```text
-NO
->30
-<30
-```
-
-For this project, the target was converted into a binary classification problem:
-
-```text
-0 → No early readmission
-1 → Readmitted within 30 days
-```
-
-The `<30` category was therefore treated as the positive class, while `NO` and `>30` were treated as the negative class.
-
----
-
-## Final Dataset
-
-After data cleaning, duplicate handling, feature engineering, and preprocessing, the final modelling dataset contained:
-
-```text
-Patient records: 67,580
-Model features: 71
-```
-
-The final target distribution was:
-
-| Readmission Class             | Number of Patients |
-| ----------------------------- | -----------------: |
-| 0 — No early readmission      |             61,451 |
-| 1 — Readmitted within 30 days |              6,129 |
-
-This corresponds to a strongly imbalanced classification problem, with early readmission representing approximately **9.1% of the final dataset**.
-
-Because of this imbalance, accuracy alone is not sufficient to evaluate model performance. Precision, recall, F1 score, and ROC-AUC were therefore also considered.
+* HbA1c results
+* Maximum glucose serum results
+* Diabetes medication changes
 
 ---
 
 ## Exploratory Data Analysis
 
-Exploratory analysis was performed to investigate relationships between patient characteristics and readmission.
+Exploratory analysis was performed to investigate relationships between readmission and important clinical and hospital-utilization variables.
 
-The analysis examined variables including:
+The analysis included visualizations examining:
 
-* Age
-* Gender
+* Distribution of readmission outcomes
+* Time spent in hospital
+* Patient age
 * Race
-* Time in hospital
+* Gender
 * Number of medications
-* Number of laboratory procedures
-* Number of procedures
+* Diabetes medication prescription
 * Healthcare service utilization
-* Glucose serum results
+* Glucose serum test results
 * HbA1c results
-* Diabetes medication status
-* Admission characteristics
+* Number of laboratory procedures
 
-Visualizations were created using **Matplotlib** and **Seaborn**, including:
-
-* Readmission class distributions
-* Count plots
-* Kernel density plots
-* Feature distributions
-* Readmission comparisons across demographic groups
-* Readmission comparisons across clinical variables
-
-These visualizations were used to understand the structure of the dataset and identify potential relationships before model development.
+Kernel density plots and categorical count plots were used to explore differences between patients who were and were not readmitted within 30 days.
 
 ---
 
 ## Data Preprocessing
 
-Several preprocessing steps were performed to convert the raw clinical dataset into a suitable format for machine learning.
+The preprocessing pipeline consisted of several stages.
 
-### 1. Removing Uninformative or Highly Missing Variables
+### 1. Target Transformation
 
-Variables with extensive missing information or limited modelling usefulness were removed, including:
-
-```text
-weight
-payer_code
-medical_specialty
-```
-
-Additional medication variables with extremely limited variation were also removed.
-
----
-
-### 2. Handling Missing and Unknown Values
-
-Records containing unknown or invalid values in selected important variables were removed.
-
-This included records with unavailable:
-
-* Diagnosis codes
-* Race
-* Gender
-* Certain discharge dispositions
-
-Discharge disposition corresponding to death or hospice-related outcomes was also excluded from the modelling population.
-
----
-
-### 3. Duplicate Patient Handling
-
-The dataset contains multiple encounters for some patients.
-
-Duplicate patient records were therefore handled using `patient_nbr`, retaining the first available encounter for each patient in the modelling dataset.
-
-This reduced repeated patient observations and resulted in the final modelling population of:
+The original three-category readmission variable was converted into a binary target:
 
 ```text
-67,580 patients
+0 → Not readmitted within 30 days
+1 → Readmitted within 30 days
 ```
 
----
+### 2. Duplicate Patient Handling
 
-### 4. Medication Feature Engineering
+Duplicate encounters belonging to the same patient were handled to create the final modelling population.
 
-Medication variables were converted into numerical representations.
+### 3. Missing-Value Handling
 
-Medication status such as:
+Missing and unknown categorical values were processed before model training.
 
-```text
-No
-Steady
-Up
-Down
-```
+### 4. Diagnostic Feature Engineering
 
-was transformed into binary indicators representing whether the medication was active or changed.
+Diagnosis codes were transformed into hierarchical diagnostic categories to make the clinical information more suitable for machine learning.
 
-Two additional medication-related features were engineered:
+### 5. Categorical Encoding
 
-```text
-numchange
-nummed
-```
+Categorical variables were converted into numerical representations using encoding techniques such as one-hot encoding.
 
-`numchange` represents the number of medications whose status indicated a change.
-
-`nummed` represents the number of medications recorded as active.
-
----
-
-### 5. Healthcare Utilization Feature Engineering
-
-A service utilization feature was initially created from:
-
-```text
-number_outpatient
-number_emergency
-number_inpatient
-```
-
-The resulting utilization information was explored during EDA.
-
-The original utilization variables were subsequently transformed using logarithmic transformations where appropriate to reduce skewness.
-
----
-
-### 6. Diagnostic Feature Engineering
-
-The original diagnosis variables contain ICD-9 diagnosis codes.
-
-Three primary diagnosis variables were processed:
-
-```text
-diag_1
-diag_2
-diag_3
-```
-
-Hierarchical diagnostic representations were created to group diagnosis codes into broader clinical categories.
-
-The resulting diagnostic features included:
-
-```text
-level1_diag1
-level1_diag2
-level1_diag3
-
-level2_diag1
-level2_diag2
-level2_diag3
-```
-
-These features grouped diagnosis codes into broader disease categories rather than treating every individual diagnosis code as a separate feature.
-
----
-
-### 7. Categorical Encoding
-
-Categorical variables were converted into machine-learning-compatible numerical representations.
-
-One-hot encoding was applied to variables including:
+Encoded variables included:
 
 * Gender
 * Race
 * Admission type
 * Discharge disposition
 * Admission source
-* Maximum glucose serum result
+* Glucose serum result
 * HbA1c result
-* Diagnostic category
+* Diagnostic categories
 
-This produced the final numerical feature matrix used by the classification models.
+### 6. Log Transformations
 
----
+Highly skewed healthcare-utilization variables were transformed using logarithmic transformations where appropriate.
 
-### 8. Age Transformation
-
-The original age ranges were converted into numerical categories and subsequently mapped to representative midpoint values.
-
-For example, age ranges were represented using values such as:
+For example:
 
 ```text
-5
-15
-25
-35
-45
-55
-65
-75
-85
-95
-```
-
-This allowed age to be incorporated as a numerical modelling feature.
-
----
-
-### 9. Log Transformation
-
-Several highly skewed numerical variables were examined using skewness and kurtosis.
-
-Where appropriate, logarithmic transformations were applied using:
-
-```python
-log()
-```
-
-or
-
-```python
-log1p()
-```
-
-The resulting transformed features included variables such as:
-
-```text
+number_inpatient_log1p
 number_outpatient_log1p
 number_emergency_log1p
-number_inpatient_log1p
 ```
 
-These transformations were used to reduce the influence of highly skewed distributions.
+### 7. Interaction Features
 
----
-
-### 10. Interaction Features
-
-Additional interaction terms were engineered to capture relationships between clinical and hospital-utilization variables.
+Additional interaction features were created to capture relationships between clinical and hospital-utilization variables.
 
 Examples include:
 
 ```text
 num_medications | time_in_hospital
-num_medications | num_procedures
-time_in_hospital | num_lab_procedures
 num_medications | num_lab_procedures
+time_in_hospital | num_lab_procedures
 num_medications | number_diagnoses
 age | number_diagnoses
 change | num_medications
-number_diagnoses | time_in_hospital
-num_medications | numchange
 ```
-
-These features represent multiplicative interactions between the corresponding variables.
 
 ---
 
 ## Class Imbalance
 
-The final target distribution was substantially imbalanced:
+The final modelling dataset remained highly imbalanced.
 
-```text
-Class 0: 61,451
-Class 1:  6,129
-```
+The target distribution was:
 
-Without addressing this imbalance, a model could achieve relatively high accuracy while performing poorly at identifying the minority early-readmission cases.
+| Readmission |      Count |
+| ----------- | ---------: |
+| `0`         |     61,451 |
+| `1`         |      6,129 |
+| **Total**   | **67,580** |
 
-To address this problem, **SMOTE** was used on the training data.
+This imbalance means that a model could achieve relatively high accuracy by predominantly predicting the majority class.
 
-SMOTE generates synthetic examples of the minority class rather than simply duplicating existing observations.
+Therefore, **SMOTE (Synthetic Minority Over-sampling Technique)** was incorporated into the modelling workflow to improve representation of the minority class during model training.
 
-The modelling workflow therefore used the following structure:
-
-```text
-Original Dataset
-       ↓
-Train / Test Split
-       ↓
-SMOTE on Training Data
-       ↓
-Balanced Training Dataset
-       ↓
-Model Training
-       ↓
-Evaluation on Test Data
-```
-
-The test set was kept separate from SMOTE so that model evaluation could be performed on data that was not synthetically oversampled.
+Because early readmission is the minority class, metrics such as **precision, recall, F1-score, and ROC-AUC** were considered alongside accuracy.
 
 ---
 
-# Machine Learning Models
+## Machine Learning Models
 
-## 1. Decision Tree
+Two classification models were evaluated.
 
-A Decision Tree classifier was selected because it can model nonlinear relationships and provides an interpretable feature-importance measure.
+### 1. Decision Tree
 
-The model configuration used:
+A Decision Tree classifier was used because of its interpretability and ability to capture nonlinear relationships between features.
+
+The model was configured using:
 
 ```python
 DecisionTreeClassifier(
-    criterion='entropy',
+    criterion="entropy",
     max_depth=28,
     min_samples_split=10
 )
 ```
 
-The Decision Tree was trained using the SMOTE-balanced training data.
+Decision Tree feature importance was subsequently used to identify the variables that contributed most strongly to the model's predictions.
 
 ---
 
-## 2. K-Nearest Neighbors
+### 2. K-Nearest Neighbors
 
-A KNN classifier was also developed for comparison.
+A KNN classifier was also developed as a comparison model.
 
-Because KNN is distance-based, the input variables were standardized using:
+Because KNN is distance-based, feature scaling was performed before model training.
 
-```python
-StandardScaler
+Hyperparameters were tuned using **GridSearchCV** with ROC-AUC as the model-selection metric.
+
+The search considered:
+
+```text
+n_neighbors: 3, 5, 7
+weights: uniform, distance
+p: 1, 2
 ```
 
-The scaler was fitted using the training data and then applied to the test data.
-
-Hyperparameter tuning was performed using `GridSearchCV` with ROC-AUC as the optimization metric.
-
-The final selected KNN configuration was:
+The best configuration identified by the search was:
 
 ```text
 n_neighbors = 5
@@ -453,76 +282,61 @@ weights = uniform
 
 ---
 
-# Model Evaluation
+## Model Evaluation
 
-The models were evaluated using multiple classification metrics:
+The final models were evaluated using:
 
-### Accuracy
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* ROC-AUC
 
-Measures the overall proportion of correctly classified observations.
-
-### Precision
-
-Measures the proportion of predicted positive cases that were actually early readmissions.
-
-### Recall
-
-Measures the proportion of actual early-readmission cases correctly identified by the model.
-
-### F1 Score
-
-Provides a harmonic mean of precision and recall.
-
-### ROC-AUC
-
-Measures the model's ability to distinguish between the two classes across different classification thresholds.
-
-Because the target variable is highly imbalanced, particular attention was given to precision, recall, F1 score, and ROC-AUC rather than relying solely on accuracy.
+These metrics provide a more complete evaluation than accuracy alone, particularly because the target variable is highly imbalanced.
 
 ---
 
-# Results
+## Results
 
-The final models produced the following results on the test set:
+### Decision Tree
 
-| Model         |   Accuracy |  Precision |     Recall |   F1 Score |    ROC-AUC |
-| ------------- | ---------: | ---------: | ---------: | ---------: | ---------: |
-| Decision Tree | **0.8212** | **0.1111** | **0.1387** | **0.1234** | **0.5205** |
-| KNN           | **0.8273** | **0.1226** | **0.1468** | **0.1336** | **0.5481** |
+| Metric    |      Score |
+| --------- | ---------: |
+| Accuracy  | **0.8212** |
+| Precision | **0.1111** |
+| Recall    | **0.1387** |
+| F1-score  | **0.1234** |
+| ROC-AUC   | **0.5205** |
 
-### KNN Parameters
+### KNN
 
-The best-performing KNN configuration identified through grid search was:
+| Metric    |      Score |
+| --------- | ---------: |
+| Accuracy  | **0.8273** |
+| Precision | **0.1226** |
+| Recall    | **0.1468** |
+| F1-score  | **0.1336** |
+| ROC-AUC   | **0.5481** |
+
+### Best KNN Parameters
 
 ```text
 {
-    'n_neighbors': 5,
-    'p': 2,
-    'weights': 'uniform'
+    'knn__n_neighbors': 5,
+    'knn__p': 2,
+    'knn__weights': 'uniform'
 }
 ```
 
----
+The KNN model achieved a ROC-AUC of **0.5481**, while the Decision Tree achieved **0.5205** on the evaluated test set.
 
-## Interpretation of Results
-
-The models achieved overall accuracy above 82%, but accuracy should be interpreted cautiously because the dataset contains a substantial class imbalance.
-
-The relatively low precision, recall, F1 score, and ROC-AUC indicate that the models had **limited ability to reliably distinguish early-readmission cases from non-early-readmission cases**.
-
-The KNN model produced a ROC-AUC of approximately **0.548**, while the Decision Tree produced approximately **0.521**.
-
-Therefore, the results demonstrate that the modelling pipeline successfully implemented the classification task, but the current feature set and modelling approaches do **not provide strong predictive discrimination for early readmission**.
-
-This is an important finding rather than simply focusing on the accuracy score. In an imbalanced healthcare prediction problem, a model that achieves high accuracy but has weak minority-class detection may have limited practical predictive value.
+The relatively low ROC-AUC values indicate that the models had limited ability to distinguish early readmission cases from non-early-readmission cases. This is an important limitation of the current modelling approach and is reported rather than relying on accuracy alone.
 
 ---
 
-# Decision Tree Feature Importance
+## Decision Tree Feature Importance
 
-The Decision Tree's built-in feature importance scores were examined to identify which variables contributed most strongly to its predictions.
-
-The ten highest-ranked features were:
+The ten features with the highest Decision Tree feature-importance scores were:
 
 | Rank | Feature                                | Importance |
 | ---: | -------------------------------------- | ---------: |
@@ -537,159 +351,111 @@ The ten highest-ranked features were:
 |    9 | `age`                                  |   0.027420 |
 |   10 | `num_medications\|time_in_hospital`    |   0.026094 |
 
-The largest feature importance was associated with:
+The most influential feature in the Decision Tree was:
 
 ```text
 number_inpatient_log1p
 ```
 
-followed by:
+with an importance score of approximately **0.2044**.
 
-```text
-change
-```
-
-and several engineered interaction features involving medication usage, laboratory procedures, age, diagnoses, and time in hospital.
-
-These feature-importance values describe the variables used most heavily by the fitted Decision Tree. They should not be interpreted as evidence that an individual feature independently causes hospital readmission.
+Feature importance is used here to describe the variables contributing to the model's predictions. It should not be interpreted as establishing clinical causation or independent statistical association.
 
 ---
 
-# Project Workflow
+## Project Workflow
 
 ```text
-                  Clinical Dataset
-                        │
-                        ▼
-              Exploratory Data Analysis
-                        │
-                        ▼
-                Data Cleaning
-                        │
-                        ▼
-             Duplicate Patient Handling
-                        │
-                        ▼
-            Diagnostic Feature Engineering
-                        │
-                        ▼
-             Medication Feature Engineering
-                        │
-                        ▼
-             Interaction Feature Engineering
-                        │
-                        ▼
-             Categorical Variable Encoding
-                        │
-                        ▼
-              Binary Target Construction
-                        │
-                        ▼
-                 Train/Test Split
-                        │
-                        ▼
-              SMOTE on Training Data
-                        │
-             ┌──────────┴──────────┐
-             ▼                     ▼
-      Decision Tree               KNN
-             │                     │
-             │              Standard Scaling
-             │                     │
-             │              Hyperparameter
-             │                 Tuning
-             │                     │
-             └──────────┬──────────┘
-                        ▼
-                Model Evaluation
-                        │
-                        ▼
-          Accuracy / Precision / Recall
-                 F1 / ROC-AUC
-                        │
-                        ▼
-             Feature Importance Analysis
+Original Diabetes Dataset
+          ↓
+Data Cleaning
+          ↓
+Exploratory Data Analysis
+          ↓
+Target Transformation
+          ↓
+Patient-Level Deduplication
+          ↓
+Diagnostic Feature Engineering
+          ↓
+Categorical Encoding
+          ↓
+Log Transformations
+          ↓
+Interaction Feature Engineering
+          ↓
+Final Dataset
+67,580 Records × 71 Features
+          ↓
+Class Imbalance Handling
+          ↓
+SMOTE
+          ↓
+Train/Test Modelling
+          ↓
+ ┌───────────────────────┐
+ │                       │
+ ▼                       ▼
+Decision Tree            KNN
+ │                       │
+ ▼                       ▼
+Feature Importance       GridSearchCV
+ │                       │
+ └───────────┬───────────┘
+             ↓
+     Model Evaluation
+             ↓
+Accuracy / Precision /
+Recall / F1 / ROC-AUC
 ```
 
 ---
 
-# Technologies Used
+## Technologies Used
 
 * **Python**
 * **Pandas**
 * **NumPy**
+* **SciPy**
 * **Matplotlib**
 * **Seaborn**
 * **Scikit-learn**
 * **imbalanced-learn**
-* **SciPy**
 * **Google Colab**
 * **GitHub**
 
 ---
 
-# Key Skills Demonstrated
+## Key Takeaways
 
-This project demonstrates experience with:
+This project demonstrates an end-to-end machine learning workflow for a healthcare prediction problem, including:
 
-* Data cleaning
 * Exploratory data analysis
 * Healthcare data preprocessing
-* Feature engineering
-* Diagnostic code transformation
+* Diagnostic feature engineering
 * Categorical encoding
 * Log transformations
-* Interaction-term engineering
-* Class-imbalance handling
-* SMOTE
+* Interaction feature engineering
+* Class-imbalance handling using SMOTE
 * Decision Tree classification
 * KNN classification
 * Hyperparameter tuning
-* Feature scaling
-* Cross-validation
-* Classification evaluation
-* ROC-AUC analysis
-* Model interpretability
-* Data visualization
-* Python-based machine learning workflows
+* Model evaluation using multiple classification metrics
+* Feature-importance analysis
+
+The results also demonstrate an important aspect of applied machine learning: **high accuracy alone does not necessarily indicate strong predictive performance when the target classes are highly imbalanced**. For this reason, precision, recall, F1-score, and ROC-AUC were included in the evaluation.
 
 ---
 
-# Limitations
+## Limitations
 
-Several limitations should be considered when interpreting the results.
+Several limitations should be considered when interpreting the results:
 
-### Class imbalance
-
-Early readmission represents a relatively small proportion of the final dataset. Although SMOTE was used on the training data, minority-class prediction remains challenging.
-
-### Model performance
-
-The relatively low ROC-AUC, precision, recall, and F1 scores indicate that the current models have limited predictive discrimination.
-
-### Feature limitations
-
-The available variables may not capture all factors associated with hospital readmission, such as detailed socioeconomic information, clinical severity, treatment decisions, follow-up care, or other patient-level characteristics.
-
-### Feature importance
-
-Decision Tree feature importance indicates how heavily features were used by the fitted model. It does not establish causation or clinical importance.
-
-### Clinical application
-
-The models developed in this project are intended for **educational and analytical purposes** and should not be interpreted as validated clinical decision-support systems.
-
----
-
-# Conclusion
-
-This project demonstrates an end-to-end machine learning workflow for a highly imbalanced healthcare classification problem.
-
-The analysis progressed from raw clinical data through exploratory analysis, preprocessing, diagnostic feature engineering, medication and interaction features, categorical encoding, class-imbalance handling, model development, hyperparameter tuning, and evaluation.
-
-Both Decision Tree and KNN models were evaluated using multiple performance metrics. While the models achieved overall accuracy above 82%, the relatively low ROC-AUC, precision, recall, and F1 scores demonstrate the difficulty of accurately identifying early hospital readmissions in this dataset.
-
-The project therefore highlights an important practical lesson in healthcare machine learning: **model evaluation should consider class imbalance and minority-class performance rather than relying on accuracy alone**.
+1. The dataset is substantially imbalanced toward patients who were not readmitted within 30 days.
+2. The relatively low ROC-AUC values indicate limited discriminative performance from the evaluated models.
+3. Decision Tree feature importance indicates contribution to model predictions rather than clinical causation.
+4. The dataset represents historical hospital encounters from 1999–2008 and may not fully represent current healthcare practices.
+5. The models are intended as an academic machine-learning exercise and should not be interpreted as clinical decision-support systems.
 
 ---
 
@@ -698,56 +464,32 @@ The project therefore highlights an important practical lesson in healthcare mac
 ```text
 Diabetes-Readmission-Prediction/
 │
-├── Diabetes_Readmission_Prediction.ipynb
+├── fdsreadmission.ipynb
 ├── README.md
 ├── requirements.txt
-└── data/
-    └── diabetic_data.csv
+└── .gitignore
 ```
 
-> The dataset may need to be obtained separately depending on its licensing and distribution terms.
+### Main Notebook
+
+`fdsreadmission.ipynb` contains the complete workflow, including:
+
+* Data loading
+* Data cleaning
+* Exploratory analysis
+* Feature engineering
+* Data preprocessing
+* SMOTE
+* Decision Tree modelling
+* KNN modelling
+* Hyperparameter tuning
+* Model evaluation
+* Feature importance analysis
 
 ---
 
-## How to Run
+## Conclusion
 
-### 1. Clone the repository
+This project explores the use of machine learning to predict **early hospital readmission among diabetic patients**. The workflow combines healthcare data preprocessing, feature engineering, class-imbalance handling, interpretable Decision Tree modelling, KNN classification, hyperparameter optimization, and multi-metric evaluation.
 
-```bash
-git clone <your-repository-url>
-cd Diabetes-Readmission-Prediction
-```
-
-### 2. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Open the notebook
-
-The project was developed in Google Colab and can also be run using Jupyter Notebook.
-
-```bash
-jupyter notebook
-```
-
-Open:
-
-```text
-Diabetes_Readmission_Prediction.ipynb
-```
-
-### 4. Provide the dataset
-
-Upload or place the required dataset in the expected location before executing the notebook.
-
----
-
-## Author
-
-**Pratiksha Kamath**
-
-B.Tech Information Technology
-
-Machine Learning | Data Analytics | Python
+Although the final models demonstrate limited discriminative performance based on ROC-AUC, the project provides a complete practical example of applying machine-learning techniques to a highly imbalanced healthcare classification problem and highlights the importance of selecting appropriate evaluation metrics beyond accuracy.
